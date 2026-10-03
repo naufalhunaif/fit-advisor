@@ -1,0 +1,18 @@
+name = "fit-advisor"
+main = "src/index.js"
+compatibility_date = "2026-06-15"
+
+[vars]
+FIT_API_URL = "https://connect.alogaritm.com/api/v1/fit"
+CORET_URL = "https://studios.alogaritm.com/coret.js"
+# Origin lain yang boleh memanggil /api/fit atau meng-embed halaman (pisahkan koma).
+ALLOWED_ORIGINS = ""
+
+# Batas 30 request / menit per IP untuk /api/fit.
+[[ratelimits]]
+name = "FIT_LIMITER"
+namespace_id = "1101"
+
+  [ratelimits.simple]
+  limit = 30
+  period = 60
