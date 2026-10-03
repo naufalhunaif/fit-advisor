@@ -26,18 +26,18 @@ curl -X POST https://fit-advisor.<subdomain>.workers.dev/api/fit \
 Field selain kelima field Fit dibuang sebelum diteruskan. Error 401/403 dari
 Connect (key salah, scope, whitelist IP) dikembalikan sebagai `502` tanpa detail.
 
-## Visual (Coret)
+## Tampilan
 
-| Kondisi | SVG |
-| --- | --- |
-| Awal | `work-measuring-clothing` |
-| Menghitung | `object-measuring-tape` |
-| Hasil jas / jaket | `measure-jacket-chest` |
-| Hasil kemeja / kaos | `measure-garment-chest-armhole-width` |
-| Hasil celana | `measure-pants-waist-width` |
-| Error | `flow-thinker` |
+Wizard 4 langkah dengan animasi geser antar langkah:
 
-Ganti nama di `TYPES` / `VISUAL` pada `src/ui.js`.
+| Langkah | Isi | SVG Coret |
+| --- | --- | --- |
+| 1 | Pilih pakaian (Jas, Jaket, Kemeja, Kaos, Celana) | `work-measuring-clothing` |
+| 2 | Tinggi, berat, usia (opsional) | `object-measuring-tape` |
+| 3 | Gaya: Slim, Regular, Oversize | `object-hanger` / `object-shirt` / `object-trousers` |
+| 4 | Hasil ukuran + alternatif | menghitung: `object-measuring-tape`; hasil: `measure-jacket-chest` / `measure-garment-chest-armhole-width` / `measure-pants-waist-width`; error: `flow-thinker` |
+
+Ganti nama SVG di `TYPES` pada `src/ui.js`.
 
 ## Setup
 
@@ -69,7 +69,7 @@ Lokal: salin `.dev.vars.example` ke `.dev.vars`, isi key, lalu `npm run dev`.
 <iframe src="https://fit-advisor.<subdomain>.workers.dev/?type=pants" width="100%" height="640" style="border:0"></iframe>
 ```
 
-Parameter opsional: `type` (`suit`, `jacket`, `shirt`, `tshirt`, `pants`), `height`, `weight`, `age`.
+Parameter opsional: `type` (`suit`, `jacket`, `shirt`, `tshirt`, `pants`; langsung ke langkah 2), `height`, `weight`, `age`.
 Domain induk iframe harus ada di `ALLOWED_ORIGINS`.
 
 ## Test
