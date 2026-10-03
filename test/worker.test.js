@@ -32,11 +32,18 @@ test('serves the page with Coret SVG and CSP', async () => {
   const html = await res.text();
   assert.match(html, /data-coret="work-measuring-clothing"/);
   assert.match(html, /\/assets\/coret\.js/);
+  assert.match(html, /\/assets\/app\.js\?v=[a-z0-9]+/);
+  assert.equal(res.headers.get('cache-control'), 'no-cache');
   assert.match(res.headers.get('content-security-policy'), /frame-ancestors 'self' https:\/\/shop\.example\.com/);
 });
 
-test('client script parses', async () => {
-  const res = await worker.fetch(new Request(ORIGIN + '/assets/app.js'), env, {});
+test('client script parses and is versioned', async () => {
+  const page = await (await worker.fetch(new Request(ORIGIN + '/'), env, {})).text();
+  const src = page.match(/\/assets\/app\.js\?v=[a-z0-9]+/)[0];
+  const res = await worker.fetch(new Request(ORIGIN + src), env, {});
+  assert.match(res.headers.get('cache-control'), /immutable/);
+  const stale = await worker.fetch(new Request(ORIGIN + '/assets/app.js?v=old'), env, {});
+  assert.equal(stale.headers.get('cache-control'), 'no-cache');
   const code = await res.text();
   assert.doesNotThrow(() => new Function(code));
 });

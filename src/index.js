@@ -6,6 +6,10 @@ const FIT_FIELDS = ['type', 'height', 'weight', 'age', 'style'];
 const MAX_BODY = 16 * 1024;
 const UPSTREAM_TIMEOUT_MS = 10000;
 
+// Version the client script so a redeploy never pairs new HTML with a cached old script.
+const APP_VERSION = hashText(CLIENT_JS);
+const PAGE = HTML.replace('/assets/app.js', '/assets/app.js?v=' + APP_VERSION);
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -25,10 +29,13 @@ export default {
     switch (url.pathname) {
       case '/':
       case '/index.html':
-        return new Response(HTML, { headers: pageHeaders(env) });
+        return new Response(PAGE, { headers: pageHeaders(env) });
       case '/assets/app.js':
         return new Response(CLIENT_JS, {
-          headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'public, max-age=300' },
+          headers: {
+            'content-type': 'text/javascript; charset=utf-8',
+            'cache-control': url.searchParams.get('v') === APP_VERSION ? 'public, max-age=31536000, immutable' : 'no-cache',
+          },
         });
       case '/assets/coret.js':
         return coretScript(request, env, ctx);
@@ -186,7 +193,7 @@ function pageHeaders(env) {
   const frames = ["'self'", ...allowedOrigins(env)].join(' ');
   return {
     'content-type': 'text/html; charset=utf-8',
-    'cache-control': 'public, max-age=300',
+    'cache-control': 'no-cache',
     'x-content-type-options': 'nosniff',
     'referrer-policy': 'no-referrer',
     'content-security-policy': [
@@ -200,6 +207,12 @@ function pageHeaders(env) {
       'frame-ancestors ' + frames,
     ].join('; '),
   };
+}
+
+function hashText(text) {
+  let hash = 5381;
+  for (let i = 0; i < text.length; i++) hash = ((hash << 5) + hash + text.charCodeAt(i)) >>> 0;
+  return hash.toString(36);
 }
 
 function json(status, message, extraMeta, data = null) {
