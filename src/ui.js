@@ -1,12 +1,12 @@
 // Page and client script for the Fit Advisor Worker.
-// Four simple steps: garment → height/weight → fit style → result.
+// Four simple steps: garment → height/weight → fit style → result. English and Bahasa Indonesia.
 // Visuals are Coret SVG animations from studios.alogaritm.com, loaded through /assets/coret.js.
 
 export const HTML = `<!doctype html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Fit Advisor</title>
 <style>
@@ -14,12 +14,16 @@ export const HTML = `<!doctype html>
 @media (prefers-color-scheme:dark){:root{--bg:#0b0d10;--card:#121417;--line:#24272c;--text:#e5e7eb;--muted:#9ca3af;--soft:#1a1d21;--accent:#f3f4f6;--on-accent:#111827;--danger:#f87171}}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-body{display:flex;justify-content:center;padding:24px 16px}
-.app{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 20px 24px;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;padding:24px 16px}
+.app{display:flex;flex-direction:column;width:100%;max-width:420px;min-height:min(680px,calc(100dvh - 48px));background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 20px 24px;overflow:hidden}
+.steps{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:28px}
 .top{display:flex;align-items:center;justify-content:space-between;height:28px;margin-bottom:8px}
 .back{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;padding:4px 0;cursor:pointer;transition:opacity .2s}
 .back:hover{color:var(--text)}
 .back[aria-hidden=true]{opacity:0;pointer-events:none}
+.right{display:flex;align-items:center;gap:12px}
+.lang{border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--muted);font:inherit;font-size:11px;font-weight:600;padding:2px 6px;cursor:pointer}
+.lang:hover{color:var(--text);border-color:var(--accent)}
 .dots{display:flex;gap:4px}
 .dots i{width:16px;height:3px;border-radius:2px;background:var(--line);transition:background .3s,width .3s}
 .dots i.on{background:var(--accent)}
@@ -29,7 +33,7 @@ body{display:flex;justify-content:center;padding:24px 16px}
 .step.active.from-back{animation-name:in-prev}
 @keyframes in-next{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
 @keyframes in-prev{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
-.art{display:block;width:150px;height:150px;margin:4px auto 8px;color:var(--text)}
+.art{display:block;width:160px;height:160px;margin:0 auto 12px;color:var(--text)}
 h1{font-size:17px;font-weight:600;margin:0 0 16px;letter-spacing:-.01em}
 .choices{display:grid;gap:8px}
 .choices.two{grid-template-columns:1fr 1fr}
@@ -66,6 +70,7 @@ input.bad{border-color:var(--danger)}
 @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 [hidden]{display:none!important}
+@media (max-width:520px){body{padding:0;align-items:stretch}.app{max-width:none;min-height:100vh;min-height:100dvh;border:0;border-radius:0;padding:12px 20px calc(24px + env(safe-area-inset-bottom))}.art{width:180px;height:180px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <script src="/assets/coret.js" defer></script>
@@ -74,82 +79,158 @@ input.bad{border-color:var(--danger)}
 <body>
 <main class="app">
   <div class="top">
-    <button class="back" id="back" type="button" aria-hidden="true">&#8249; Kembali</button>
-    <div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <button class="back" id="back" type="button" aria-hidden="true" data-i18n="back">&#8249; Back</button>
+    <div class="right">
+      <button class="lang" id="lang" type="button" aria-label="Language">ID</button>
+      <div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    </div>
   </div>
 
+  <div class="steps">
   <section class="step active" data-step="1">
     <svg class="art" data-coret="work-measuring-clothing" width="150" height="150"></svg>
-    <h1>Mau cek ukuran apa?</h1>
+    <h1 data-i18n="q1">What do you want to size?</h1>
     <div class="choices two">
-      <button class="choice" type="button" data-type="suit">Jas</button>
-      <button class="choice" type="button" data-type="jacket">Jaket</button>
-      <button class="choice" type="button" data-type="shirt">Kemeja</button>
-      <button class="choice" type="button" data-type="tshirt">Kaos</button>
-      <button class="choice wide" type="button" data-type="pants">Celana</button>
+      <button class="choice" type="button" data-type="suit" data-i18n="suit">Suit</button>
+      <button class="choice" type="button" data-type="jacket" data-i18n="jacket">Jacket</button>
+      <button class="choice" type="button" data-type="shirt" data-i18n="shirt">Shirt</button>
+      <button class="choice" type="button" data-type="tshirt" data-i18n="tshirt">T-shirt</button>
+      <button class="choice wide" type="button" data-type="pants" data-i18n="pants">Pants</button>
     </div>
   </section>
 
   <section class="step" data-step="2">
     <svg class="art" data-coret="object-measuring-tape" width="150" height="150"></svg>
-    <h1>Tinggi &amp; berat badan</h1>
+    <h1 data-i18n="q2">Height &amp; weight</h1>
     <form id="body-form" novalidate>
       <div class="pair">
-        <label class="num"><small>Tinggi</small><input name="height" inputmode="numeric" autocomplete="off" placeholder="170"><span>cm</span></label>
-        <label class="num"><small>Berat</small><input name="weight" inputmode="decimal" autocomplete="off" placeholder="68"><span>kg</span></label>
+        <label class="num"><small data-i18n="height">Height</small><input name="height" inputmode="numeric" autocomplete="off" placeholder="170"><span>cm</span></label>
+        <label class="num"><small data-i18n="weight">Weight</small><input name="weight" inputmode="decimal" autocomplete="off" placeholder="68"><span>kg</span></label>
       </div>
-      <label class="num age"><input name="age" inputmode="numeric" autocomplete="off" placeholder="Usia (opsional)"><span>th</span></label>
+      <label class="num age"><input name="age" inputmode="numeric" autocomplete="off" placeholder="Age (optional)" data-i18n-ph="age"><span data-i18n="yr">yr</span></label>
       <p class="err" id="body-err" role="alert" hidden></p>
-      <button class="primary" type="submit">Lanjut</button>
+      <button class="primary" type="submit" data-i18n="next">Next</button>
     </form>
   </section>
 
   <section class="step" data-step="3">
     <svg class="art" id="style-art" data-coret="object-hanger" width="150" height="150"></svg>
-    <h1>Suka yang mana?</h1>
+    <h1 data-i18n="q3">Which fit do you like?</h1>
     <div class="choices">
-      <button class="choice" type="button" data-style="slim">Slim <small>pas badan</small></button>
-      <button class="choice" type="button" data-style="regular">Regular <small>standar</small></button>
-      <button class="choice" type="button" data-style="oversize">Oversize <small>longgar</small></button>
+      <button class="choice" type="button" data-style="slim">Slim <small data-i18n="slimSub">close to body</small></button>
+      <button class="choice" type="button" data-style="regular">Regular <small data-i18n="regularSub">standard</small></button>
+      <button class="choice" type="button" data-style="oversize">Oversize <small data-i18n="oversizeSub">loose</small></button>
     </div>
   </section>
 
   <section class="step" data-step="4" aria-live="polite">
     <svg class="art" id="result-art" data-coret="object-measuring-tape" width="150" height="150"></svg>
-    <div id="loading"><p class="label">Menghitung ukuran...</p></div>
+    <div id="loading"><p class="label" data-i18n="loading">Calculating your size...</p></div>
     <div id="result" hidden>
-      <p class="label" id="r-label">Ukuran kamu</p>
+      <p class="label" id="r-label"></p>
       <div class="big" id="r-size"></div>
       <p class="pct" id="r-pct"></p>
       <div class="alts" id="r-alts"></div>
       <p class="hint" id="r-hint"></p>
     </div>
     <div id="failed" hidden><p class="label" id="f-msg"></p></div>
-    <button class="ghost" id="restart" type="button" hidden>Cek lagi</button>
+    <button class="ghost" id="restart" type="button" hidden></button>
   </section>
+  </div>
 </main>
 </body>
 </html>`;
 
 export const CLIENT_JS = String.raw`(function () {
   'use strict';
-  var TYPES = {
-    suit: { label: 'jas', object: 'object-hanger', guide: 'measure-jacket-chest', how: 'Cek di jas: lebar dada dari ketiak kiri ke kanan.' },
-    jacket: { label: 'jaket', object: 'object-hanger', guide: 'measure-jacket-chest', how: 'Cek di jaket: lebar dada dari ketiak kiri ke kanan.' },
-    shirt: { label: 'kemeja', object: 'object-shirt', guide: 'measure-garment-chest-armhole-width', how: 'Cek di kemeja: bentangkan, ukur bawah ketiak kiri ke kanan.' },
-    tshirt: { label: 'kaos', object: 'object-shirt', guide: 'measure-garment-chest-armhole-width', how: 'Cek di kaos: bentangkan, ukur bawah ketiak kiri ke kanan.' },
-    pants: { label: 'celana', object: 'object-trousers', guide: 'measure-pants-waist-width', how: 'Cek di celana: lebar ban pinggang kiri ke kanan.' }
+  var I18N = {
+    en: {
+      back: '‹ Back', q1: 'What do you want to size?', q2: 'Height & weight', q3: 'Which fit do you like?',
+      suit: 'Suit', jacket: 'Jacket', shirt: 'Shirt', tshirt: 'T-shirt', pants: 'Pants',
+      height: 'Height', weight: 'Weight', age: 'Age (optional)', yr: 'yr', next: 'Next',
+      slimSub: 'close to body', regularSub: 'standard', oversizeSub: 'loose',
+      loading: 'Calculating your size...', yourSize: 'Your {type} size', match: '{n}% match',
+      custom: 'Custom', outside: 'Outside standard sizes', customHint: 'Contact us for a custom size.',
+      again: 'Check again', retry: 'Try again',
+      errHeight: 'Enter height in cm, e.g. 170.', errWeight: 'Weight must be 40–117 kg.', errAge: 'Age 1–120, or leave it empty.',
+      errCheck: 'Please check your {field}.', errNetwork: 'Connection failed. Try again.', errBusy: 'Too many requests. Try again shortly.',
+      errDown: 'Fit Advisor is unavailable right now.', errGeneric: 'Something went wrong. Try again.',
+      how: {
+        suit: 'Check on a suit: chest width from armpit to armpit, buttoned.',
+        jacket: 'Check on a jacket: chest width from armpit to armpit.',
+        shirt: 'Check on a shirt: lay it flat, measure below the armpits.',
+        tshirt: 'Check on a T-shirt: lay it flat, measure below the armpits.',
+        pants: 'Check on pants: waistband width from edge to edge.'
+      },
+      noun: { suit: 'suit', jacket: 'jacket', shirt: 'shirt', tshirt: 'T-shirt', pants: 'pants' }
+    },
+    id: {
+      back: '‹ Kembali', q1: 'Mau cek ukuran apa?', q2: 'Tinggi & berat badan', q3: 'Suka yang mana?',
+      suit: 'Jas', jacket: 'Jaket', shirt: 'Kemeja', tshirt: 'Kaos', pants: 'Celana',
+      height: 'Tinggi', weight: 'Berat', age: 'Usia (opsional)', yr: 'th', next: 'Lanjut',
+      slimSub: 'pas badan', regularSub: 'standar', oversizeSub: 'longgar',
+      loading: 'Menghitung ukuran...', yourSize: 'Ukuran {type} kamu', match: '{n}% cocok',
+      custom: 'Custom', outside: 'Di luar ukuran standar', customHint: 'Hubungi CS untuk ukuran custom.',
+      again: 'Cek lagi', retry: 'Coba lagi',
+      errHeight: 'Isi tinggi dalam cm, contoh 170.', errWeight: 'Berat 40–117 kg.', errAge: 'Usia 1–120, atau kosongkan.',
+      errCheck: 'Periksa kembali {field}.', errNetwork: 'Koneksi gagal. Coba lagi.', errBusy: 'Terlalu banyak permintaan. Coba lagi sebentar.',
+      errDown: 'Fit Advisor sedang tidak tersedia.', errGeneric: 'Terjadi kesalahan. Coba lagi.',
+      how: {
+        suit: 'Cek di jas: lebar dada dari ketiak kiri ke kanan, jas dikancing.',
+        jacket: 'Cek di jaket: lebar dada dari ketiak kiri ke kanan.',
+        shirt: 'Cek di kemeja: bentangkan, ukur bawah ketiak kiri ke kanan.',
+        tshirt: 'Cek di kaos: bentangkan, ukur bawah ketiak kiri ke kanan.',
+        pants: 'Cek di celana: lebar ban pinggang kiri ke kanan.'
+      },
+      noun: { suit: 'jas', jacket: 'jaket', shirt: 'kemeja', tshirt: 'kaos', pants: 'celana' }
+    }
+  };
+  var ART = {
+    suit: { object: 'object-hanger', guide: 'measure-jacket-chest' },
+    jacket: { object: 'object-hanger', guide: 'measure-jacket-chest' },
+    shirt: { object: 'object-shirt', guide: 'measure-garment-chest-armhole-width' },
+    tshirt: { object: 'object-shirt', guide: 'measure-garment-chest-armhole-width' },
+    pants: { object: 'object-trousers', guide: 'measure-pants-waist-width' }
   };
 
-  var state = { step: 1, type: null, height: '', weight: '', age: '', style: null };
+  var state = { step: 1, type: null, height: '', weight: '', age: '', style: null, view: null, data: null, error: null };
+  var lang = pickLang();
   var steps = document.querySelectorAll('.step');
   var dots = document.querySelectorAll('.dots i');
   var back = document.getElementById('back');
+  var langBtn = document.getElementById('lang');
   var bodyForm = document.getElementById('body-form');
   var bodyErr = document.getElementById('body-err');
   var resultArt = document.getElementById('result-art');
   var restart = document.getElementById('restart');
   var $ = function (id) { return document.getElementById(id); };
+
+  function pickLang() {
+    var q = new URLSearchParams(location.search).get('lang');
+    if (q && I18N[q]) return q;
+    try { var saved = localStorage.getItem('fit-lang'); if (saved && I18N[saved]) return saved; } catch (e) {}
+    return /^(id|ms)/i.test(navigator.language || '') ? 'id' : 'en';
+  }
+  function t(key, vars) {
+    var text = I18N[lang][key];
+    Object.keys(vars || {}).forEach(function (k) { text = text.replace('{' + k + '}', vars[k]); });
+    return text;
+  }
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+    langBtn.textContent = lang === 'en' ? 'ID' : 'EN';
+    langBtn.title = lang === 'en' ? 'Bahasa Indonesia' : 'English';
+    if (!bodyErr.hidden && state.bodyErrKey) bodyErr.textContent = t(state.bodyErrKey, state.bodyErrVars);
+    if (state.view === 'result') renderResult(state.data, true);
+    if (state.view === 'failed') renderFailed(state.error);
+  }
+  langBtn.addEventListener('click', function () {
+    lang = lang === 'en' ? 'id' : 'en';
+    try { localStorage.setItem('fit-lang', lang); } catch (e) {}
+    applyLang();
+  });
 
   function go(step, backwards) {
     state.step = step;
@@ -175,16 +256,14 @@ export const CLIENT_JS = String.raw`(function () {
       el.classList.toggle('sel', el.getAttribute(attr) === value);
     });
   }
-
   function setArt(el, name) {
     if (el.getAttribute('data-coret') !== name) el.setAttribute('data-coret', name);
   }
-
   function chooseType(type) {
-    if (!TYPES[type]) return;
+    if (!ART[type]) return;
     state.type = type;
     markSelected(steps[0], 'data-type', type);
-    setArt($('style-art'), TYPES[type].object);
+    setArt($('style-art'), ART[type].object);
   }
 
   // Step 1: garment
@@ -197,8 +276,10 @@ export const CLIENT_JS = String.raw`(function () {
 
   // Step 2: height and weight
   function num(value) { return Number(String(value).replace(',', '.')); }
-  function bodyError(message, field) {
-    bodyErr.textContent = message;
+  function bodyError(key, field, vars) {
+    state.bodyErrKey = key;
+    state.bodyErrVars = vars;
+    bodyErr.textContent = t(key, vars);
     bodyErr.hidden = false;
     bodyForm.querySelectorAll('input').forEach(function (i) { i.classList.toggle('bad', i.name === field); });
     if (field) bodyForm.elements[field].focus();
@@ -208,9 +289,9 @@ export const CLIENT_JS = String.raw`(function () {
     var h = bodyForm.elements.height.value.trim();
     var w = bodyForm.elements.weight.value.trim();
     var a = bodyForm.elements.age.value.trim();
-    if (!/^\d+$/.test(h) || num(h) < 1 || num(h) > 300) return bodyError('Isi tinggi dalam cm, contoh 170.', 'height');
-    if (!w || isNaN(num(w)) || num(w) < 40 || num(w) > 117) return bodyError('Berat 40–117 kg.', 'weight');
-    if (a && (!/^\d+$/.test(a) || num(a) < 1 || num(a) > 120)) return bodyError('Usia 1–120, atau kosongkan.', 'age');
+    if (!/^\d+$/.test(h) || num(h) < 1 || num(h) > 300) return bodyError('errHeight', 'height');
+    if (!w || isNaN(num(w)) || num(w) < 40 || num(w) > 117) return bodyError('errWeight', 'weight');
+    if (a && (!/^\d+$/.test(a) || num(a) < 1 || num(a) > 120)) return bodyError('errAge', 'age');
     bodyErr.hidden = true;
     bodyForm.querySelectorAll('input').forEach(function (i) { i.classList.remove('bad'); });
     state.height = h; state.weight = w; state.age = a;
@@ -228,6 +309,7 @@ export const CLIENT_JS = String.raw`(function () {
 
   // Step 4: result
   function show(id) {
+    state.view = id;
     ['loading', 'result', 'failed'].forEach(function (name) { $(name).hidden = name !== id; });
     var el = $(id);
     el.classList.remove('fade'); void el.offsetWidth; el.classList.add('fade');
@@ -260,28 +342,35 @@ export const CLIENT_JS = String.raw`(function () {
     if (out.status === 200 && data) return renderResult(data);
     var fields = data && data.fields_error;
     if (out.status === 400 && fields && fields.length) {
+      state.view = null;
       go(2, true);
-      var field = ['height', 'weight', 'age'].filter(function (f) { return fields.indexOf(f) >= 0; })[0];
-      return bodyError('Periksa kembali ' + (field === 'height' ? 'tinggi' : field === 'age' ? 'usia' : 'berat') + '.', field || null);
+      var field = ['height', 'weight', 'age'].filter(function (f) { return fields.indexOf(f) >= 0; })[0] || 'weight';
+      return bodyError(field === 'height' ? 'errHeight' : field === 'age' ? 'errAge' : 'errWeight', field);
     }
+    var key = out.status === 0 ? 'errNetwork' : out.status === 429 ? 'errBusy' : out.status >= 500 ? 'errDown' : 'errGeneric';
+    renderFailed(key);
+  }
+
+  function renderFailed(key) {
+    state.error = key;
     setArt(resultArt, 'flow-thinker');
-    $('f-msg').textContent = out.status === 0 ? 'Koneksi gagal. Coba lagi.' : ((out.json.meta && out.json.meta.message) || 'Terjadi kesalahan. Coba lagi.');
-    show('failed');
-    restart.textContent = 'Coba lagi';
+    $('f-msg').textContent = t(key);
+    if (state.view !== 'failed') show('failed');
+    restart.textContent = t('retry');
     restart.hidden = false;
   }
 
-  function renderResult(data) {
-    var info = TYPES[state.type];
+  function renderResult(data, quiet) {
+    state.data = data;
     var pants = state.type === 'pants';
     var size = pants ? data.recommended_pants_no : data.recommended_size;
     var known = size != null && size !== 'Tidak diketahui';
 
-    $('r-label').textContent = 'Ukuran ' + info.label + ' kamu';
+    $('r-label').textContent = t('yourSize', { type: I18N[lang].noun[state.type] });
     var big = $('r-size');
-    big.textContent = known ? (pants ? 'No. ' + size : size) : 'Custom';
-    big.classList.remove('pop'); void big.offsetWidth; big.classList.add('pop');
-    $('r-pct').textContent = known ? (data.recommended_size_percentage || 0) + '% cocok' : 'Di luar ukuran standar';
+    big.textContent = known ? (pants ? 'No. ' + size : size) : t('custom');
+    if (!quiet) { big.classList.remove('pop'); void big.offsetWidth; big.classList.add('pop'); }
+    $('r-pct').textContent = known ? t('match', { n: data.recommended_size_percentage || 0 }) : t('outside');
 
     var alts = $('r-alts');
     alts.textContent = '';
@@ -292,34 +381,33 @@ export const CLIENT_JS = String.raw`(function () {
     });
     alts.hidden = !alts.childNodes.length;
 
-    $('r-hint').textContent = known ? info.how : 'Hubungi CS untuk ukuran custom.';
-    setArt(resultArt, info.guide);
-    show('result');
-    restart.textContent = 'Cek lagi';
+    $('r-hint').textContent = known ? I18N[lang].how[state.type] : t('customHint');
+    setArt(resultArt, ART[state.type].guide);
+    if (!quiet) show('result');
+    restart.textContent = t('again');
     restart.hidden = false;
   }
 
   restart.addEventListener('click', function () {
-    if ($('failed').hidden) {
-      state.style = null;
-      markSelected(steps[2], 'data-style', '');
-      go(1, true);
-    } else {
-      go(4); calculate();
-    }
+    if (state.view === 'failed') { go(4); calculate(); return; }
+    state.style = null;
+    state.view = null;
+    markSelected(steps[2], 'data-style', '');
+    go(1, true);
   });
 
   back.addEventListener('click', function () {
     if (state.step > 1 && state.step < 4) go(state.step - 1, true);
   });
 
-  // Optional prefill for embeds: ?type=pants&height=170&weight=68&age=30
+  // Optional prefill for embeds: ?type=pants&height=170&weight=68&age=30&lang=en
   var params = new URLSearchParams(location.search);
   ['height', 'weight', 'age'].forEach(function (name) {
     var value = params.get(name);
     if (value) bodyForm.elements[name].value = value;
   });
+  applyLang();
   var preset = params.get('type');
-  if (preset && TYPES[preset]) { chooseType(preset); go(2); } else go(1);
+  if (preset && ART[preset]) { chooseType(preset); go(2); } else go(1);
 })();
 `;

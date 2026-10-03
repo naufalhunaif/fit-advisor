@@ -28,7 +28,9 @@ Connect (key salah, scope, whitelist IP) dikembalikan sebagai `502` tanpa detail
 
 ## Tampilan
 
-Wizard 4 langkah dengan animasi geser antar langkah:
+Wizard 4 langkah, tinggi penuh layar (mobile full screen, desktop kartu di tengah), animasi geser antar langkah.
+
+Bahasa: English dan Indonesia — otomatis dari bahasa browser, bisa diganti lewat tombol EN/ID (tersimpan) atau `?lang=en` / `?lang=id`.
 
 | Langkah | Isi | SVG Coret |
 | --- | --- | --- |
@@ -37,7 +39,7 @@ Wizard 4 langkah dengan animasi geser antar langkah:
 | 3 | Gaya: Slim, Regular, Oversize | `object-hanger` / `object-shirt` / `object-trousers` |
 | 4 | Hasil ukuran + alternatif | menghitung: `object-measuring-tape`; hasil: `measure-jacket-chest` / `measure-garment-chest-armhole-width` / `measure-pants-waist-width`; error: `flow-thinker` |
 
-Ganti nama SVG di `TYPES` pada `src/ui.js`.
+Ganti nama SVG di `ART`, teks di `I18N` pada `src/ui.js`.
 
 ## Setup
 
@@ -69,7 +71,7 @@ Lokal: salin `.dev.vars.example` ke `.dev.vars`, isi key, lalu `npm run dev`.
 <iframe src="https://fit-advisor.<subdomain>.workers.dev/?type=pants" width="100%" height="640" style="border:0"></iframe>
 ```
 
-Parameter opsional: `type` (`suit`, `jacket`, `shirt`, `tshirt`, `pants`; langsung ke langkah 2), `height`, `weight`, `age`.
+Parameter opsional: `type` (`suit`, `jacket`, `shirt`, `tshirt`, `pants`; langsung ke langkah 2), `height`, `weight`, `age`, `lang` (`en`, `id`).
 Domain induk iframe harus ada di `ALLOWED_ORIGINS`.
 
 ## Test
